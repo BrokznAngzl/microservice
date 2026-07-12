@@ -19,6 +19,16 @@ public class ExternalOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String composeId;
+
+    @Column(name = "order_name")
+    private String orderName;
+
+    @Column(name = "external_node")
+    private String externalNode;
+
+    private String endpoint;
+
     @Column(name = "created_date")
     private Date createdDate;
 

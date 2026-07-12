@@ -18,12 +18,11 @@ public class ExternalParam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "external_id")
-    private External external;
+    private String externalId;
 
-    @Column(name = "external_name")
-    private String externalName;
+    @Column(name = "parameter_name")
+    private String parameterName;
 
     private String type;
 

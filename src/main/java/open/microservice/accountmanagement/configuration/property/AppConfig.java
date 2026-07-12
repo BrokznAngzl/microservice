@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
     private Pod pod;
 
+    /* product order */
     @Data
     public static class Pod {
         private String host;
-        private String port;
-        private String service;
+        private String uri;
         private String timeout;
     }
 }

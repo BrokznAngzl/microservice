@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_EXTERNAL;
 import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_SCHEMA;
 
@@ -22,6 +20,9 @@ public class External {
     @Column(name = "order_name")
     private String orderName;
 
+    @Column(name = "external_node")
+    private String externalNode;
+
     private String action;
 
     private String api;
@@ -30,6 +31,4 @@ public class External {
     @JoinColumn(name = "condition_id")
     private Condition condition;
 
-    @OneToMany(mappedBy = "external")
-    private List<ExternalParam> externalParams;
 }
