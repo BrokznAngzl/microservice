@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_CONDITION;
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_SCHEMA;
+
 @Entity
-@Table(name = "condition")
+@Table(schema = OM_SCHEMA, name = OM_CONDITION)
 @Getter
 @Setter
 public class Condition {

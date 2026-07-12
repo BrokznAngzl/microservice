@@ -5,10 +5,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_EXTERNAL_PARAM;
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_SCHEMA;
 
 @Entity
-@Table(name = "external_param")
+@Table(schema = OM_SCHEMA, name = OM_EXTERNAL_PARAM)
 @Getter
 @Setter
 public class ExternalParam {

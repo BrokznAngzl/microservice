@@ -6,8 +6,11 @@ import lombok.Setter;
 
 import java.util.Date;
 
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_EXTERNAL_ORDER;
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_SCHEMA;
+
 @Entity
-@Table(name = "external_order")
+@Table(schema = OM_SCHEMA, name = OM_EXTERNAL_ORDER)
 @Getter
 @Setter
 public class ExternalOrder {

@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_ORDER;
+import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_SCHEMA;
+
 @Entity
-@Table(name = "order")
+@Table(schema = OM_SCHEMA, name = OM_ORDER)
 public class Order {
 
     @Id
