@@ -1,0 +1,21 @@
+package open.microservice.accountmanagement.configuration.property;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "app-config")
+public class AppConfig {
+    private Pod pod;
+
+    @Data
+    public static class Pod {
+        private String host;
+        private String port;
+        private String service;
+        private String timeout;
+    }
+}
+
