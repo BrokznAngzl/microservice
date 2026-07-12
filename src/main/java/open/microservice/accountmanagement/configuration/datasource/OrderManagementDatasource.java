@@ -45,7 +45,7 @@ public class OrderManagementDatasource {
     }
 
     @Primary
-    @Bean(name = "transactionManager")
+    @Bean(name = "omTransactionManager")
     public PlatformTransactionManager transactionManager(@Qualifier("omEntityManagerFactory") EntityManagerFactory omEntityManagerFactory) {
         return new JpaTransactionManager(omEntityManagerFactory);
     }

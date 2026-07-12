@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
     }
 
     @Override
+    @Transactional(timeout = 60, transactionManager = "omTransactionManager", rollbackFor = Exception.class)
     public void saveOrderAndExOrder(Order order) {
         orderRepository.save(order);
         exOrderRepository.saveAll(order.getExternalOrders());
@@ -103,7 +105,10 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
         Order order = orderProperty.getOrder();
         if (ObjectUtil.isNotEmpty(order.getExternalOrders())) {
             for (ExternalOrder exOrder : order.getExternalOrders()) {
-                IComposer composer = composers.stream().filter(c -> c.canCompose(exOrder.getComposeId())).findFirst().get();
+                IComposer composer = composers.stream()
+                        .filter(c -> c.canCompose(exOrder.getComposeId()))
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("No composer found for composeId: " + exOrder.getComposeId()));
                 composer.compose(orderProperty, exOrder, order);
             }
         } else {
