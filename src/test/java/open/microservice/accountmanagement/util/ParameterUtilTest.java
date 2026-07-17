@@ -47,9 +47,16 @@ class ParameterUtilTest {
     @Test
     void testGetMethodValue() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDate = sdf.format(new Date());
-        String mappingDate = parameterUtil.getMethodValue("getCurrentDate(yyyy-MM-dd)");
-        assertEquals(currentDate, mappingDate);
+        String expectedYyyyMmDd = sdf.format(new Date());
+
+        sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String expectedDdMmYyyy = sdf.format(new Date());
+
+        String actualYyyyMmDd = parameterUtil.getMethodValue("getCurrentDate(yyyy-MM-dd)");
+        String actualDdMmYyyy = parameterUtil.getMethodValue("getCurrentDate(dd-MM-yyyy)");
+
+        assertEquals(expectedYyyyMmDd, actualYyyyMmDd);
+        assertEquals(expectedDdMmYyyy, actualDdMmYyyy);
     }
 
     @Test
