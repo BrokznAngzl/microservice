@@ -45,9 +45,8 @@ public class ObjectUtil {
     public static Address getEntity(AddressDto addressDto) {
         Address address = new Address();
         address.setId(addressDto.getId());
-        address.setHomeNumber(addressDto.getHomeNumber());
+        address.setAddressDetail(addressDto.getDetail());
         address.setProvince(addressDto.getProvince());
-        address.setAccountNo(addressDto.getAccountNo());
 
         return address;
     }
@@ -56,6 +55,7 @@ public class ObjectUtil {
         Account account = new Account();
         account.setId(accountDto.getId());
         account.setAccountNo(accountDto.getAccountNo());
+        account.setAccountName(accountDto.getAccountName());
         account.setCreateDate(DateUtil.stringToDate(accountDto.getCreateDate(), DateUtil.APP_DATE_FORMAT));
 
         return account;
@@ -65,7 +65,11 @@ public class ObjectUtil {
         AccountDto accountDto = new AccountDto();
         accountDto.setId(account.getId());
         accountDto.setAccountNo(account.getAccountNo());
-        accountDto.setCreateDate(DateUtil.dateToString(accountDto.getCreateDate(), DateUtil.SQL_DATE_FORMAT, DateUtil.APP_DATE_FORMAT));
+        accountDto.setAccountName(account.getAccountName());
+        accountDto.setCreateDate(DateUtil.dateToString(account.getCreateDate(), DateUtil.APP_DATE_FORMAT));
+        accountDto.setCreateBy(account.getCreateBy());
+        accountDto.setLastUpdatedDate(DateUtil.dateToString(account.getCreateDate(), DateUtil.APP_DATE_FORMAT));
+        accountDto.setLastUpdateBy(account.getLastUpdateBy());
         accountDto.setAddress(ObjectUtil.getDto(account.getAddress()));
         return accountDto;
     }
@@ -73,9 +77,8 @@ public class ObjectUtil {
     public static AddressDto getDto(Address address) {
         AddressDto addressDto = new AddressDto();
         addressDto.setId(address.getId());
-        addressDto.setHomeNumber(address.getHomeNumber());
+        addressDto.setDetail(address.getAddressDetail());
         addressDto.setProvince(address.getProvince());
-        addressDto.setAccountNo(address.getAccountNo());
         return addressDto;
     }
 }

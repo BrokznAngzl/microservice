@@ -3,6 +3,7 @@ package open.microservice.accountmanagement.helper;
 
 import lombok.extern.log4j.Log4j2;
 import open.microservice.accountmanagement.util.DateUtil;
+import open.microservice.accountmanagement.util.ObjectUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,12 +23,17 @@ public class DBMethodAction {
         }
     }
 
-    public String concat(String[] values) {
+    public String concat(Object[] values) {
         try {
-            StringBuilder sb = new StringBuilder();
-            for (String value : values) {
-                sb.append(value);
+            if (ObjectUtil.isEmpty(values)) {
+                return "";
             }
+
+            StringBuilder sb = new StringBuilder();
+            for (Object value : values) {
+                sb.append(value.toString());
+            }
+
             return sb.toString();
         } catch (Exception e) {
             log.error("error concatenating values: {}", e.getMessage());
@@ -42,6 +48,19 @@ public class DBMethodAction {
             return sdf.format(new Date());
         } catch (Exception e) {
             log.error("error getting current date: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public String isPresent(Object parameterName) {
+        try {
+            if (ObjectUtil.isEmpty(parameterName)) {
+                return "false";
+            }
+
+            return "true";
+        } catch (Exception e) {
+            log.error("isPresent error: {}", e.getMessage());
             return null;
         }
     }

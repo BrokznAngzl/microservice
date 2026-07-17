@@ -18,7 +18,7 @@ public class ExternalParam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @JoinColumn(name = "external_id")
+    @Column(name = "external_id")
     private String externalId;
 
     @Column(name = "parameter_name")

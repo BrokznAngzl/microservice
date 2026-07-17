@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 public class AddressDto {
     private String id;
-    private String homeNumber;
+    private String detail;
     private String province;
-    private String accountNo;
 }

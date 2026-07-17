@@ -21,12 +21,10 @@ public class Address {
     @Id
     @Column(name = "id")
     private String id;
-    @Column(name = "home_number")
-    private String homeNumber;
+    @Column(name = "address_detail")
+    private String addressDetail;
     @Column(name = "provice")
     private String province;
-    @Column(name = "account_no")
-    private String accountNo;
 //    need more columns
 }
 

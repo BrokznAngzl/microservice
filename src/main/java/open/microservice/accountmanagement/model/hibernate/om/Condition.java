@@ -14,15 +14,15 @@ import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_S
 public class Condition {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "source_type")
     private String sourceType;
 
-    private String source;
+    @Column(name = "source_value")
+    private String sourceValue;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "operator_id")
     private Operator operator;
 

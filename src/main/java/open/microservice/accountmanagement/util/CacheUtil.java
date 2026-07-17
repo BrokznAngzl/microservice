@@ -11,9 +11,7 @@ import open.microservice.accountmanagement.repository.om.ExternalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -79,7 +77,7 @@ public class CacheUtil {
                 if (this.externals.containsKey(key)) {
                     this.externals.get(key).add(external);
                 } else {
-                    this.externals.put(key, List.of(external));
+                    this.externals.put(key, new ArrayList<>(Arrays.asList(external)));
                 }
             }
         }

@@ -15,7 +15,8 @@ public class AppConfig {
     public static class Pod {
         private String host;
         private String uri;
-        private String timeout;
+        private String conTimeout;
+        private String readTimeout;
     }
 }
 

@@ -14,8 +14,7 @@ import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_S
 public class External {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "order_name")
     private String orderName;
@@ -23,11 +22,14 @@ public class External {
     @Column(name = "external_node")
     private String externalNode;
 
+    @Column(name = "compose_sequence")
+    private int composeSequence;
+
     private String action;
 
     private String api;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "condition_id")
     private Condition condition;
 

@@ -26,20 +26,17 @@ public class ConditionUtil {
             return switch (operator) {
                 case EQUALS -> StringUtil.equals(source, targetValue);
                 case NOT_EQUALS -> !StringUtil.equals(source, targetValue);
-                default -> {
-                    log.warn("Unknown condition source: {}", condition.getId());
-                    yield false;
-                }
+                default -> false;
             };
         } catch (Exception e) {
-            log.error("Error evaluating condition: {}", condition.getId(), e);
+            log.error("error evaluating condition: {}", condition.getId(), e);
             return false;
         }
     }
 
     private String getValue(Condition condition) {
         String type = condition.getSourceType();
-        String value = condition.getSource();
+        String value = condition.getSourceValue();
 
         switch (type) {
             case STATIC:

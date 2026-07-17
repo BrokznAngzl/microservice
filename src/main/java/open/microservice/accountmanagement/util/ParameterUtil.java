@@ -7,8 +7,11 @@ import open.microservice.accountmanagement.helper.DBMethodAction;
 import open.microservice.accountmanagement.helper.DBMethodHelper;
 import open.microservice.accountmanagement.model.Parameter;
 import com.google.gson.JsonObject;
+import open.microservice.accountmanagement.model.hibernate.om.ExternalParam;
 
 import java.util.List;
+
+import static open.microservice.accountmanagement.constant.SourceTypeConstant.*;
 
 @Log4j2
 public class ParameterUtil {
@@ -62,6 +65,22 @@ public class ParameterUtil {
         } catch (Exception e) {
             log.error("Error invoking method: " + source, e);
             return null;
+        }
+    }
+
+    public String getValue(ExternalParam externalParam) {
+        String type = externalParam.getType();
+        String value = externalParam.getValue();
+
+        switch (type) {
+            case STATIC:
+                return value;
+            case JSONPATH:
+                return getJsonValue(value);
+            case METHOD:
+                return getMethodValue(value);
+            default:
+                return null;
         }
     }
 

@@ -1,6 +1,9 @@
 package open.microservice.accountmanagement.model.hibernate.om;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,13 +19,16 @@ import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_S
 public class ExternalOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    private String composeId;
+//    @Column(name = "order_id")
+//    private String orderId;
 
     @Column(name = "order_name")
     private String orderName;
+
+    @Column(name = "external_id")
+    private String externalId;
 
     @Column(name = "external_node")
     private String externalNode;
@@ -55,5 +61,4 @@ public class ExternalOrder {
 
     @Column(name = "status")
     private String status;
-
 }

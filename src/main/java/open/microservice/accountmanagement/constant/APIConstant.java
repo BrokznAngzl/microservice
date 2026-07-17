@@ -9,5 +9,5 @@ public class APIConstant {
     public static final String RESEND = "/resend";
 
     /* api name */
-    public static final String CREATE_ACCOUNT = "createAccount";
+    public static final String CREATE_ACCOUNT = "/v1/registry";
 }

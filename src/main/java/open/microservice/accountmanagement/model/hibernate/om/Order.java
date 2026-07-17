@@ -17,8 +17,7 @@ import static open.microservice.accountmanagement.constant.DatabaseConstant.OM_S
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String request;
 
@@ -37,10 +36,10 @@ public class Order {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "respones")
-    private String respones;
+    private String response;
 
-    @OneToMany(mappedBy = "order")
-    private List<ExternalOrder> externalOrders;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private List<ExternalOrder> externalOrder;
 
 }

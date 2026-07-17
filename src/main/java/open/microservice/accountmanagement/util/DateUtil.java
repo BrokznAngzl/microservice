@@ -10,6 +10,11 @@ import java.util.Date;
 public class DateUtil {
     public static final String APP_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
     public static final String SQL_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
+
+    public static Date getCurrentLocalDateTime() {
+        return new Date();
+    }
 
     public static String convertDate(String originalDate, String originalFormat, String targetFormat) {
         try {
@@ -30,7 +35,11 @@ public class DateUtil {
         return inputFormat.parse(dateString);
     }
 
-    public static String dateToString(String dateString, String formatIn, String formatOut) {
+    public static String parseFormat(String dateString, String formatIn, String formatOut) {
         return convertDate(dateString, formatIn, formatOut);
+    }
+
+    public static String dateToString(Date date, String pattern) {
+        return new SimpleDateFormat(pattern).format(date);
     }
 }

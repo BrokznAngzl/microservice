@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static open.microservice.accountmanagement.constant.APIConstant.CREATE_ACCOUNT;
@@ -55,8 +56,7 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
 
     private void validateRequiredParameter(AccountRequest request, List<ErrorModel> errorList) throws Exception {
 
-        validateUtil.validateMandatory(request.getPublicId(), errorList, "publicId");
-        validateUtil.validateMandatory(request.getPrivateId(), errorList, "privateId");
+        validateUtil.validateMandatory(request.getRequestId(), errorList, "requestId");
         validateUtil.validateMandatory(request.getAccountName(), errorList, "accountName");
 
         if (ObjectUtil.isNotEmpty(request.getPhone())) {
@@ -87,8 +87,8 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
     @Override
     @Transactional(timeout = 60, transactionManager = "omTransactionManager", rollbackFor = Exception.class)
     public void saveOrderAndExOrder(Order order) {
+        exOrderRepository.saveAll(order.getExternalOrder());
         orderRepository.save(order);
-        exOrderRepository.saveAll(order.getExternalOrders());
     }
 
     @Override
@@ -103,12 +103,12 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
     @Override
     public void composeExOrderAndParam(OrderPropertyInformation orderProperty) throws Exception {
         Order order = orderProperty.getOrder();
-        if (ObjectUtil.isNotEmpty(order.getExternalOrders())) {
-            for (ExternalOrder exOrder : order.getExternalOrders()) {
+        if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
+            for (ExternalOrder exOrder : order.getExternalOrder()) {
                 IComposer composer = composers.stream()
-                        .filter(c -> c.canCompose(exOrder.getComposeId()))
+                        .filter(c -> c.canCompose(exOrder.getExternalId()))
                         .findFirst()
-                        .orElseThrow(() -> new Exception("No composer found for composeId: " + exOrder.getComposeId()));
+                        .orElseThrow(() -> new Exception("no composer found for composeId: " + exOrder.getExternalId()));
                 composer.compose(orderProperty, exOrder, order);
             }
         } else {
@@ -119,8 +119,8 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
 
     @Override
     public void provisioning(Order order) throws Exception {
-//        if (ObjectUtil.isNotEmpty(order.getExternalOrders())) {
-//            for (ExternalOrder externalOrder : order.getExternalOrders()) {
+//        if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
+//            for (ExternalOrder externalOrder : order.getExternalOrder()) {
 //                IProvisioner provisioner = provisioners.stream().filter(p -> p.canProvisioning("")).findFirst().get();
 //                provisioner.provisioning(externalOrder);
 //            }
@@ -132,51 +132,62 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
     public OrderPropertyInformation buildOrderProperty(AccountRequest request) {
         OrderPropertyInformation orderProperty = new OrderPropertyInformation();
         Order order = new Order();
-        order.setRequest(mapper.writeValueAsString(request));
-        order.setExternalOrders(getExternalOrder(request));
+        order.setId(IdGeneratorUtil.generateId(1000, 10000)); // 1000 - 9999
+        String requestInfo = mapper.writeValueAsString(request);
+        order.setRequest(requestInfo);
+        orderProperty.setRequestInfo(requestInfo);
+
+        String action = request.getAction();
+        String apiName = CREATE_ACCOUNT;
+        String composeKey = action + "|" + apiName;
+
+        order.setExternalOrder(getExternalOrder(orderProperty, composeKey, order.getId()));
         orderProperty.setOrder(order);
         return orderProperty;
     }
 
-    private List<ExternalOrder> getExternalOrder(AccountRequest request) {
-        String jsonModel = mapper.writeValueAsString(request);
-        String action = request.getAction();
-        String apiName = CREATE_ACCOUNT;
-        String key = action + "|" + apiName;
+    private List<ExternalOrder> getExternalOrder(OrderPropertyInformation orderProperty, String composeKey, String orderId) {
+        String jsonModel = mapper.writeValueAsString(orderProperty);
 
-        List<External> externals = cacheUtil.getExternal(key);
+        List<External> externals = cacheUtil.getExternal(composeKey);
+        externals.sort(Comparator.comparingInt(External::getComposeSequence));
         List<ExternalOrder> externalOrders = new ArrayList<>();
 
         if (ObjectUtil.isNotEmpty(externals)) {
             ConditionUtil conditionUtil = new ConditionUtil(jsonModel);
 
+            int exOrderSeq = 1;
             for (External external : externals) {
                 Condition condition = external.getCondition();
                 if (ObjectUtil.isEmpty(condition)) {
-                    externalOrders.add(getDraftExternalOrder(external));
+                    externalOrders.add(getDraftExternalOrder(external, orderId, exOrderSeq));
+                    exOrderSeq++;
                 } else {
                     if (conditionUtil.activeCondition(condition)) {
-                        externalOrders.add(getDraftExternalOrder(external));
+                        externalOrders.add(getDraftExternalOrder(external, orderId, exOrderSeq));
+                        exOrderSeq++;
                     } else {
                         log.info("Condition is not active for external: {}", external.getId());
                     }
                 }
             }
         } else {
-            throw new RuntimeException("External not found for key: " + key);
+            throw new RuntimeException("External not found for key: " + composeKey);
         }
 
         return externalOrders;
     }
 
-    private ExternalOrder getDraftExternalOrder(External external) {
+    private ExternalOrder getDraftExternalOrder(External external, String orderId, int exOrderSeq) {
         ExternalOrder externalOrder = new ExternalOrder();
-        externalOrder.setComposeId(String.valueOf(external.getId()));
+        externalOrder.setId(String.format("%s-%03d", orderId, exOrderSeq));
+//        externalOrder.setOrderId(orderId);
+        externalOrder.setExternalId(external.getId());
         externalOrder.setOrderName(external.getOrderName());
         externalOrder.setExternalNode(external.getExternalNode());
         externalOrder.setCreatedBy("SOOD LORE");
 //        externalOrder.setEndpoint();
-        log.info("External order draft: {}", externalOrder.getOrderName());
+        log.info("external order draft: {}", externalOrder.getOrderName());
         return externalOrder;
     }
 }

@@ -17,14 +17,22 @@ import static open.microservice.accountmanagement.constant.DatabaseConstant.PF_S
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private String id;
     @Column(name = "account_no")
     private String accountNo;
+    @Column(name = "account_name")
+    private String accountName;
     @Column(name = "createDate")
     private Date createDate;
+    @Column(name = "create_by")
+    private String createBy;
+    @Column(name = "last_updated_date")
+    private Date lastUpdatedDate;
+    @Column(name = "last_update_by")
+    private String lastUpdateBy;
 
-    @OneToOne(mappedBy = "accountNo", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_primary_id")
     private Address address;
 }

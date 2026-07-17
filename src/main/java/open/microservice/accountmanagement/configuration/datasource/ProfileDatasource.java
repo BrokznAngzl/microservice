@@ -18,8 +18,8 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(entityManagerFactoryRef = "aiEntityManagerFactory",
-        basePackages = {"open.microservice.accountmanagement.repository"},
+@EnableJpaRepositories(entityManagerFactoryRef = "pfEntityManagerFactory",
+        basePackages = {"open.microservice.accountmanagement.repository.profile"},
         transactionManagerRef = "pfTransactionManager")
 public class ProfileDatasource {
 
@@ -37,7 +37,7 @@ public class ProfileDatasource {
 
     @Bean(name = "pfEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("pfDataSource") DataSource rbmDataSource) {
-        return builder.dataSource(rbmDataSource).packages("open.microservice.accountmanagement.models.hibernate.pf").persistenceUnit("oracle").build();
+        return builder.dataSource(rbmDataSource).packages("open.microservice.accountmanagement.model.hibernate.pf").persistenceUnit("oracle").build();
     }
 
     @Bean(name = "pfTransactionManager")

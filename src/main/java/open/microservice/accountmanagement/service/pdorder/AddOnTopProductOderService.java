@@ -5,14 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import open.microservice.accountmanagement.configuration.property.AppConfig;
 import open.microservice.accountmanagement.model.Parameter;
 import open.microservice.accountmanagement.model.hibernate.OrderPropertyInformation;
+import open.microservice.accountmanagement.model.hibernate.om.Condition;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalParam;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
 import open.microservice.accountmanagement.service.IComposer;
-import open.microservice.accountmanagement.util.CacheUtil;
-import open.microservice.accountmanagement.util.ConditionUtil;
-import open.microservice.accountmanagement.util.ParameterUtil;
-import open.microservice.accountmanagement.util.StringUtil;
+import open.microservice.accountmanagement.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -49,22 +47,28 @@ public class AddOnTopProductOderService implements IComposer {
         externalOrder.setEndpoint(host + uri);
         externalOrder.setStatus(PENDING);
 
-        List<ExternalParam> externalParams = cacheUtil.getExternalParam(externalOrder.getComposeId());
+        List<ExternalParam> externalParams = cacheUtil.getExternalParam(externalOrder.getExternalId());
         String jsonModel = mapper.writeValueAsString(orderProperty);
         ParameterUtil parameterUtil = new ParameterUtil(jsonModel);
         ConditionUtil conditionUtil = new ConditionUtil(jsonModel);
         List<Parameter> parameters = new ArrayList<>();
         JsonObject requestBody = new JsonObject();
 
-        for (ExternalParam param : externalParams) {
-            boolean isActive = conditionUtil.activeCondition(param.getCondition());
+        for (ExternalParam exParam : externalParams) {
+            boolean isActive = true;
+
+            Condition condition = exParam.getCondition();
+            if (ObjectUtil.isNotEmpty(condition)) {
+                isActive = conditionUtil.activeCondition(condition);
+            }
+
             if (!isActive) {
                 continue;
             }
 
-            log.info("Composing parameter: {}", param.getParameterName());
-            String paramName = param.getParameterName();
-            String value = param.getValue();
+            log.info("composing parameter: {}", exParam.getParameterName());
+            String paramName = exParam.getParameterName();
+            String value = parameterUtil.getValue(exParam);
             parameterUtil.buildParam(parameters, paramName, value);
 
         }

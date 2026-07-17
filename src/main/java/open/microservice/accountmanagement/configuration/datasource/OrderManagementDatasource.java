@@ -20,8 +20,8 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(entityManagerFactoryRef = "omEntityManagerFactory",
-        basePackages = {"open.microservice.accountmanagement.repository"},
-        transactionManagerRef = "transactionManager")
+        basePackages = {"open.microservice.accountmanagement.repository.om"},
+        transactionManagerRef = "omTransactionManager")
 public class OrderManagementDatasource {
 
     @Primary
@@ -41,7 +41,7 @@ public class OrderManagementDatasource {
     @Primary
     @Bean(name = "omEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("omDataSource") DataSource rbmDataSource) {
-        return builder.dataSource(rbmDataSource).packages("open.microservice.accountmanagement.models.hibernate.om").persistenceUnit("sqlserver").build();
+        return builder.dataSource(rbmDataSource).packages("open.microservice.accountmanagement.model.hibernate.om").persistenceUnit("sqlserver").build();
     }
 
     @Primary
