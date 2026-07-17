@@ -12,5 +12,5 @@ public class AccountRequest extends Request {
     private String accountName;
     private String orderReason;
     private Phone phone;
-    private AddressDto Address;
+    private AddressDto address;
 }
