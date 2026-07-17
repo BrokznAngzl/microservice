@@ -2,6 +2,7 @@ package open.microservice.accountmanagement.helper;
 
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
@@ -52,9 +53,19 @@ public class DBMethodHelper {
 //        Object result = method.isVarArgs()
 //                ? method.invoke(target, new Object[]{args})
 //                : method.invoke(target, args);
-        Object result = method.invoke(target, new Object[]{args});
 
-        return result == null ? null : String.valueOf(result);
+        Object result;
+
+        if (args.length == 0) {
+            result = method.invoke(target);
+        } else if (args.length == 1) {
+            result = method.invoke(target, args);
+        } else {
+            result = method.invoke(target, new Object[]{args});
+        }
+
+        return result != null ? String.valueOf(result) : null;
+
     }
 
     /*
