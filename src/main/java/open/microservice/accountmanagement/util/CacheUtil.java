@@ -1,7 +1,7 @@
 package open.microservice.accountmanagement.util;
 
 
-import jakarta.persistence.EntityNotFoundException;
+import open.microservice.accountmanagement.model.exception.ResourceNotFoundException;
 import open.microservice.accountmanagement.model.hibernate.om.ErrorMessage;
 import open.microservice.accountmanagement.model.hibernate.om.External;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalParam;
@@ -15,6 +15,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static open.microservice.accountmanagement.constant.ErrorConstant.RESOURCE_NOT_FOUND;
+import static open.microservice.accountmanagement.constant.ErrorConstant.RESOURCE_NOT_FOUND_DETAIL;
+
 
 @Component
 public class CacheUtil {
@@ -22,19 +25,19 @@ public class CacheUtil {
     private ExternalRepository externalRepository;
     @Autowired
     private ErrorMessageRepository errorMessageRepository;
+    @Autowired
+    private ExternalParamRepository externalParamRepository;
 
     private HashMap<String, List<External>> externals = new HashMap<>();
     private HashMap<String, List<ExternalParam>> externalParams = new HashMap<>();
     private HashMap<String, ErrorMessage> errorMessages = new HashMap<>();
-    @Autowired
-    private ExternalParamRepository externalParamRepository;
 
     public ErrorMessage getErrorMessage(String id) {
-        return getObject(errorMessages, id, "Error message not found for id: ");
+        return getObject(errorMessages, id, "Error Message");
     }
 
     public List<External> getExternal(String key) {
-        return getObject(externals, key, "External not found for id: ");
+        return getObject(externals, key, "External");
     }
 
     public List<ExternalParam> getExternalParam(String externalId) {
@@ -53,16 +56,16 @@ public class CacheUtil {
         }
 
         if (ObjectUtil.isEmpty(exParams)) {
-            throw new EntityNotFoundException("ExternalParam not found for externalId: " + externalId);
+            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND, StringUtil.format(RESOURCE_NOT_FOUND_DETAIL, "External Param For External", externalId));
         }
 
         return exParams;
     }
 
-    private <T> T getObject(Map<String, T> map, String id, String notFoundMessage) {
+    private <T> T getObject(Map<String, T> map, String id, String entityType) {
         T value = map.get(id);
         if (ObjectUtil.isEmpty(value)) {
-            throw new EntityNotFoundException(notFoundMessage + id);
+            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND, StringUtil.format(RESOURCE_NOT_FOUND_DETAIL, entityType, id));
         }
         return value;
     }
@@ -88,49 +91,4 @@ public class CacheUtil {
         }
 
     }
-
-    /*
-    public static List<External> getMockUpExternal() {
-        External pfExternal = new External();
-        ExternalNode pfNode = new ExternalNode();
-        pfNode.setName("profile");
-        pfExternal.setExternalNode(pfNode);
-        pfExternal.setOrderName("create profile");
-        Condition pfCondition = new Condition();
-        pfCondition.setId(1);
-        pfCondition.setSource("$.activity");
-        pfCondition.setTargetValue("active");
-        Operator pfOperator = new Operator();
-        pfOperator.setOperatorName(EQUALS);
-        SourcType pfSourceType = new SourcType();
-        pfSourceType.setType(JSONPATH);
-        pfCondition.setOperator(pfOperator);
-        pfCondition.setSourcType(pfSourceType);
-        pfExternal.setCondition(pfCondition);
-
-        External poExternal = new External();
-        ExternalNode poNode = new ExternalNode();
-        poNode.setName("product order");
-        poExternal.setExternalNode(poNode);
-        poExternal.setOrderName("add on top");
-        Condition poCondition = new Condition();
-        poCondition.setId(2);
-        poCondition.setSource("$.address");
-//        poCondition.setTargetValue(null);
-        Operator poOperator = new Operator();
-        poOperator.setOperatorName(NOT_EQUALS);
-        SourcType poSourceType = new SourcType();
-        poSourceType.setType(JSONPATH);
-        poCondition.setOperator(poOperator);
-        poCondition.setSourcType(poSourceType);
-        poCondition.setOperator(poOperator);
-        poExternal.setCondition(poCondition);
-
-        List<External> externals = new ArrayList<>();
-        externals.add(pfExternal);
-        externals.add(poExternal);
-
-        return externals;
-    }
-     */
 }

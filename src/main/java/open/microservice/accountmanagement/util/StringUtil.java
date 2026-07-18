@@ -36,7 +36,7 @@ public class StringUtil {
         return true;
     }
 
-    public static String format(String pattern, String[] args) {
+    public static String format(String pattern, String... args) {
         MessageFormat form = new MessageFormat(pattern);
         return form.format(args);
     }

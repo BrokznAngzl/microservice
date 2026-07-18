@@ -2,12 +2,14 @@ package open.microservice.accountmanagement.util;
 
 
 import open.microservice.accountmanagement.model.om.ErrorModel;
-import open.microservice.accountmanagement.model.request.Phone;
+import open.microservice.accountmanagement.model.request.internal.Phone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static open.microservice.accountmanagement.constant.ErrorConstant.ER400;
+import static open.microservice.accountmanagement.constant.ErrorConstant.ER404;
 import static open.microservice.accountmanagement.constant.ParameterConstance.*;
 
 
@@ -15,9 +17,6 @@ import static open.microservice.accountmanagement.constant.ParameterConstance.*;
 public class ValidateUtil {
     @Autowired
     private ExceptionUtil exceptionUtil;
-
-    private static final String ER404 = "er404";
-    private static final String ER400 = "er400";
 
     public void validateMandatory(String value, List<ErrorModel> errorList, String... fieldName) {
         if (StringUtil.isEmpty(value)) {
@@ -50,6 +49,8 @@ public class ValidateUtil {
             if (!isValidHomeNumber(phone.getPhoneNumber())) {
                 addErrorInvalid(errorList, PHONE_NUMBER);
             }
+        } else {
+            addErrorInvalid(errorList, PHONE_TYPE);
         }
     }
 }
