@@ -7,5 +7,5 @@ import open.microservice.accountmanagement.model.hibernate.om.Order;
 
 public interface IComposer {
     boolean canCompose(String value);
-    void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) throws Exception;
+    void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order);
 }

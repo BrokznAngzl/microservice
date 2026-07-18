@@ -1,4 +1,4 @@
-package open.microservice.accountmanagement.model.request;
+package open.microservice.accountmanagement.model.request.internal;
 
 import lombok.Getter;
 import lombok.Setter;

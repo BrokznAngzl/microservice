@@ -2,19 +2,23 @@ package open.microservice.accountmanagement.controller;
 
 
 import lombok.extern.log4j.Log4j2;
+import open.microservice.accountmanagement.model.dto.AccountDto;
+import open.microservice.accountmanagement.model.exception.ComposeFailedException;
+import open.microservice.accountmanagement.model.exception.ResourceNotFoundException;
+import open.microservice.accountmanagement.model.exception.ValidateFailedException;
 import open.microservice.accountmanagement.model.hibernate.OrderPropertyInformation;
 import open.microservice.accountmanagement.model.hibernate.om.Condition;
 import open.microservice.accountmanagement.model.hibernate.om.External;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
-import open.microservice.accountmanagement.model.request.AccountRequest;
 import open.microservice.accountmanagement.model.om.ErrorModel;
-import open.microservice.accountmanagement.model.request.Phone;
+import open.microservice.accountmanagement.model.request.internal.AccountRequest;
+import open.microservice.accountmanagement.model.request.internal.Phone;
+import open.microservice.accountmanagement.model.response.interal.ResponseModel;
 import open.microservice.accountmanagement.repository.om.ExternalOrderRepository;
 import open.microservice.accountmanagement.repository.om.OrderRepository;
 import open.microservice.accountmanagement.service.IComposer;
 import open.microservice.accountmanagement.util.*;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +31,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import static open.microservice.accountmanagement.constant.APIConstant.CREATE_ACCOUNT;
+import static open.microservice.accountmanagement.constant.ErrorConstant.*;
 import static open.microservice.accountmanagement.constant.ParameterConstance.PHONE_NUMBER;
 
 
 @Component
 @Log4j2
-public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
+public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> {
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -48,13 +53,13 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
     private List<IComposer> composers;
 
     @Override
-    public void validateRequest(AccountRequest request) throws Exception {
+    public void validateRequest(AccountRequest request) {
         List<ErrorModel> errorList = new ArrayList<>();
         validateRequiredParameter(request, errorList);
         validateValue(request, errorList);
     }
 
-    private void validateRequiredParameter(AccountRequest request, List<ErrorModel> errorList) throws Exception {
+    private void validateRequiredParameter(AccountRequest request, List<ErrorModel> errorList) {
 
         validateUtil.validateMandatory(request.getRequestId(), errorList, "requestId");
         validateUtil.validateMandatory(request.getAccountName(), errorList, "accountName");
@@ -70,17 +75,17 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
         }
 
         if (!errorList.isEmpty()) {
-            throw new BadRequestException("Validation failed\n" + errorList);
+            throw new ValidateFailedException(VALIDATE_FAILED, errorList);
         }
     }
 
-    private void validateValue(AccountRequest request, List<ErrorModel> errorList) throws BadRequestException {
+    private void validateValue(AccountRequest request, List<ErrorModel> errorList) {
         if (ObjectUtil.isNotEmpty(request.getPhone())) {
             validateUtil.validatePhone(request.getPhone(), errorList);
         }
 
         if (!errorList.isEmpty()) {
-            throw new BadRequestException("Validation failed\n" + errorList);
+            throw new ValidateFailedException(VALIDATE_FAILED, errorList);
         }
     }
 
@@ -93,27 +98,27 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
 
     @Override
     public ResponseEntity<?> composeResponse(OrderPropertyInformation orderProperty, AccountRequest request) throws Exception {
-//        Account profile = obm.getProfileRequestParam().getAccount();
-//        ResponseModel responseModel = new ResponseModel();
-//        responseModel.setPublicId(request.getPublicId());
-//        responseModel.setAccountNo(profile.getAccountNo());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(null);
+        AccountDto profile = orderProperty.getOrderItem().getAccount();
+        ResponseModel responseModel = new ResponseModel();
+        responseModel.setAccountNo(profile.getAccountNo());
+        responseModel.setAccountName(profile.getAccountName());
+        return ResponseEntity.status(HttpStatus.OK.value()).body(responseModel);
     }
 
     @Override
-    public void composeExOrderAndParam(OrderPropertyInformation orderProperty) throws Exception {
+    public void composeExOrderAndParam(OrderPropertyInformation orderProperty) {
         Order order = orderProperty.getOrder();
         if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
             for (ExternalOrder exOrder : order.getExternalOrder()) {
                 IComposer composer = composers.stream()
                         .filter(c -> c.canCompose(exOrder.getExternalId()))
                         .findFirst()
-                        .orElseThrow(() -> new Exception("no composer found for composeId: " + exOrder.getExternalId()));
+                        .orElseThrow(() -> new ComposeFailedException(COMPOSE_FAILED, StringUtil.format(COMPOSER_NOT_FOUND_DETAIL, exOrder.getExternalId())));
                 composer.compose(orderProperty, exOrder, order);
             }
         } else {
             log.error("has no external order to compose");
-            throw new Exception("has no external order to compose");
+            throw new ComposeFailedException(COMPOSE_FAILED, StringUtil.format(EXTERNAL_ORDER_NOT_FOUND_DETAIL, order.getId()));
         }
     }
 
@@ -172,7 +177,7 @@ public class CreateAccountHelper implements IControllerHelper<AccountRequest> {
                 }
             }
         } else {
-            throw new RuntimeException("External not found for key: " + composeKey);
+            throw new ResourceNotFoundException(StringUtil.format(RESOURCE_NOT_FOUND_DETAIL, "External", composeKey));
         }
 
         return externalOrders;

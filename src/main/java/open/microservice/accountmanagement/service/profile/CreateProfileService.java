@@ -8,7 +8,7 @@ import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
 import open.microservice.accountmanagement.model.hibernate.pf.Account;
 import open.microservice.accountmanagement.model.hibernate.pf.Address;
-import open.microservice.accountmanagement.model.request.AccountRequest;
+import open.microservice.accountmanagement.model.request.internal.AccountRequest;
 import open.microservice.accountmanagement.repository.profile.AddressRepository;
 import open.microservice.accountmanagement.service.IComposer;
 import open.microservice.accountmanagement.util.DateUtil;
@@ -39,7 +39,7 @@ public class CreateProfileService implements IComposer {
     }
 
     @Override
-    public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) throws Exception {
+    public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) {
         AccountRequest request = objectMapper.readValue(order.getRequest(), AccountRequest.class);
         Date currentDateTime = DateUtil.getCurrentLocalDateTime();
         Account account = new Account();

@@ -6,7 +6,7 @@ import lombok.Setter;
 import open.microservice.accountmanagement.model.dto.AccountDto;
 import open.microservice.accountmanagement.model.dto.OrderItem;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
-import open.microservice.accountmanagement.model.request.AccountRequest;
+import open.microservice.accountmanagement.model.request.internal.AccountRequest;
 import tools.jackson.databind.ObjectMapper;
 
 @Getter

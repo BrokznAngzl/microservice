@@ -38,7 +38,7 @@ public class AddOnTopProductOderService implements IComposer {
     }
 
     @Override
-    public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) throws Exception {
+    public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) {
         log.info("Composing on top order");
         AppConfig.Pod node = appConfig.getPod();
         String host = node.getHost();
