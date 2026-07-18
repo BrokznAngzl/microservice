@@ -9,6 +9,7 @@ import open.microservice.accountmanagement.model.hibernate.om.Order;
 import open.microservice.accountmanagement.model.hibernate.pf.Account;
 import open.microservice.accountmanagement.model.hibernate.pf.Address;
 import open.microservice.accountmanagement.model.request.internal.AccountRequest;
+import open.microservice.accountmanagement.model.request.pf.ProfileRequestParam;
 import open.microservice.accountmanagement.repository.profile.AddressRepository;
 import open.microservice.accountmanagement.service.IComposer;
 import open.microservice.accountmanagement.util.DateUtil;
@@ -41,6 +42,24 @@ public class CreateProfileService implements IComposer {
     @Override
     public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) {
         AccountRequest request = objectMapper.readValue(order.getRequest(), AccountRequest.class);
+        Account account = composeAccount(request);
+
+        orderProperty.getOrderItem().setAccount(ObjectUtil.getDto(account));
+        String profileRequestParam = objectMapper.writeValueAsString(new ProfileRequestParam(account, account.getAddress()));
+        if (log.isDebugEnabled()) log.debug("Profile Request Param: {}", profileRequestParam);
+
+        externalOrder.setRequestInfo(profileRequestParam);
+        externalOrder.setStatus(PENDING);
+        // no endpoint for this task, save with jpa
+        // externalOrder.setEndpoint();
+    }
+
+    private String genAccountNo() {
+        // Logic to generate  account number
+        return "mock_for_test_account_no";
+    }
+
+    private Account composeAccount(AccountRequest request) {
         Date currentDateTime = DateUtil.getCurrentLocalDateTime();
         Account account = new Account();
         account.setId(UUID.randomUUID().toString());
@@ -55,18 +74,7 @@ public class CreateProfileService implements IComposer {
             account.setAddress(composeAddress(request));
         }
 
-        orderProperty.getOrderItem().setAccount(ObjectUtil.getDto(account));
-        String profileRequestParam = objectMapper.writeValueAsString(account);
-        if (log.isDebugEnabled()) log.debug("Profile Request Param: {}", profileRequestParam);
-        externalOrder.setRequestInfo(profileRequestParam);
-        externalOrder.setStatus(PENDING);
-        // no endpoint for this task, save with jpa
-        // externalOrder.setEndpoint();
-    }
-
-    private String genAccountNo() {
-        // Logic to generate  account number
-        return "mock_for_test_account_no";
+        return account;
     }
 
     private Address composeAddress(AccountRequest request) {

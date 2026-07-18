@@ -21,14 +21,13 @@ public class ProfileService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Transactional(timeout = 60, transactionManager = "pfTransactionManager", rollbackFor = Exception.class)
+    @Transactional(timeout = 30, transactionManager = "pfTransactionManager", rollbackFor = Exception.class)
     public void createNewProfile(String requestParam) {
         ProfileRequestParam request = objectMapper.readValue(requestParam, ProfileRequestParam.class);
         try {
             saveProfile(request);
-            flushProfile(request);
         } catch (Exception e) {
-            log.error("Error creating new profile: {}", e.getMessage(), e);
+            log.error("error creating new profile: {}", e.getMessage(), e);
         }
     }
 
@@ -42,15 +41,6 @@ public class ProfileService {
             log.info("saving address...");
             addressRepo.save(request.getAddress());
             log.info("address saved successfully");
-        }
-    }
-
-    private void flushProfile(ProfileRequestParam request) {
-        if (ObjectUtil.isNotEmpty(request.getAccount())) {
-            accountRepo.flush();
-        }
-        if (ObjectUtil.isNotEmpty(request.getAddress())) {
-            addressRepo.flush();
         }
     }
 }

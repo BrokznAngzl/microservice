@@ -16,6 +16,7 @@ import open.microservice.accountmanagement.model.om.ErrorModel;
 import open.microservice.accountmanagement.model.request.internal.AccountRequest;
 import open.microservice.accountmanagement.model.request.internal.Phone;
 import open.microservice.accountmanagement.model.response.interal.ResponseModel;
+import open.microservice.accountmanagement.povisioner.IProvisioner;
 import open.microservice.accountmanagement.repository.om.ExternalOrderRepository;
 import open.microservice.accountmanagement.repository.om.OrderRepository;
 import open.microservice.accountmanagement.service.IComposer;
@@ -49,9 +50,10 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
     private ExternalOrderRepository exOrderRepository;
     @Autowired
     private CacheUtil cacheUtil;
-
     @Autowired
     private List<IComposer> composers;
+    @Autowired
+    private List<IProvisioner> provisioners;
 
     @Override
     public void validateRequest(AccountRequest request) {
@@ -124,15 +126,20 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
     }
 
     @Override
-    public void provisioning(Order order) throws Exception {
-//        if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
-//            for (ExternalOrder externalOrder : order.getExternalOrder()) {
-//                IProvisioner provisioner = provisioners.stream().filter(p -> p.canProvisioning("")).findFirst().get();
-//                provisioner.provisioning(externalOrder);
-//            }
-//        } else {
-//            log.error("order does not have any tasks to provision");
-//        }
+    public void provisioning(Order order) {
+
+        if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
+            for (ExternalOrder exOrder : order.getExternalOrder()) {
+                IProvisioner provisioner = provisioners.stream()
+                        .filter(p -> p.canProvisioning(exOrder.getExternalNode()))
+                        .findFirst()
+                        .orElseThrow(() -> new ComposeFailedException(PROVISIONING_FAILED, StringUtil.format(PROVISIONING_FAILED, exOrder.getExternalId())));
+                provisioner.provisioning(exOrder);
+            }
+
+        } else {
+            log.error("order does not have any tasks to provision");
+        }
     }
 
     public OrderPropertyInformation buildOrderProperty(AccountRequest request) {

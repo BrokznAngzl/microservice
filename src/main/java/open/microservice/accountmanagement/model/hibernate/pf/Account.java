@@ -33,6 +33,6 @@ public class Account {
     private String lastUpdateBy;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_primary_id")
+    @JoinColumn(name = "address_primary_id", insertable = false, updatable = false)
     private Address address;
 }
