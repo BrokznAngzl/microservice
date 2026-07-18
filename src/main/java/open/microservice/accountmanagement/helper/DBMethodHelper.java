@@ -2,7 +2,6 @@ package open.microservice.accountmanagement.helper;
 
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
@@ -10,11 +9,11 @@ import java.util.regex.Pattern;
 
 @Log4j2
 public class DBMethodHelper {
-    private final Object target;
+    private final Object methodBuffer;
     private String jsonModel;
 
-    public DBMethodHelper(Object target, String jsonModel) {
-        this.target = target;
+    public DBMethodHelper(Object methodBuffer, String jsonModel) {
+        this.methodBuffer = methodBuffer;
         this.jsonModel = jsonModel;
     }
 
@@ -46,22 +45,22 @@ public class DBMethodHelper {
 
         Method method = findMethod(methodName, args);
         if (method == null) {
-            log.error("Method '{}' not found in target class '{}'", methodName, target.getClass().getName());
+            log.error("Method '{}' not found in methodBuffer class '{}'", methodName, methodBuffer.getClass().getName());
             return null;
         }
 
 //        Object result = method.isVarArgs()
-//                ? method.invoke(target, new Object[]{args})
-//                : method.invoke(target, args);
+//                ? method.invoke(methodBuffer, new Object[]{args})
+//                : method.invoke(methodBuffer, args);
 
         Object result;
 
         if (args.length == 0) {
-            result = method.invoke(target);
+            result = method.invoke(methodBuffer);
         } else if (args.length == 1) {
-            result = method.invoke(target, args);
+            result = method.invoke(methodBuffer, args);
         } else {
-            result = method.invoke(target, new Object[]{args});
+            result = method.invoke(methodBuffer, new Object[]{args});
         }
 
         return result != null ? String.valueOf(result) : null;
@@ -87,19 +86,19 @@ public class DBMethodHelper {
 
         Method method = findMethod(methodName, args);
         if (method == null) {
-            log.error("Method '{}' not found in target class '{}'",
-                    methodName, target.getClass().getName());
+            log.error("Method '{}' not found in methodBuffer class '{}'",
+                    methodName, methodBuffer.getClass().getName());
             return null;
         }
 
-        Object result = method.invoke(target, args);
+        Object result = method.invoke(methodBuffer, args);
         return result != null ? String.valueOf(result) : null;
     }
      */
 
     /* need implement */
     private Method findMethod(String name, Object... args) {
-        for (Method method : target.getClass().getMethods()) {
+        for (Method method : methodBuffer.getClass().getMethods()) {
             if (method.getName().equals(name)) {
                 Class<?>[] paramTypes = method.getParameterTypes();
 
