@@ -3,6 +3,7 @@ package open.microservice.accountmanagement.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import open.microservice.accountmanagement.model.exception.ComposeFailedException;
+import open.microservice.accountmanagement.model.exception.ProvisioningFailedException;
 import open.microservice.accountmanagement.model.exception.ResourceNotFoundException;
 import open.microservice.accountmanagement.model.exception.ValidateFailedException;
 import open.microservice.accountmanagement.model.response.interal.ErrorResponseException;
@@ -56,6 +57,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ComposeFailedException.class)
     public ResponseEntity<ErrorResponseException> handleComposeFailedException(
             ComposeFailedException ex, HttpServletRequest request) {
+
+        ErrorResponseException response = new ErrorResponseException(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                ex.getMessage(),
+                ex.getErrorDetails(),
+                ex.getErrorDetail(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(ProvisioningFailedException.class)
+    public ResponseEntity<ErrorResponseException> handleProvisioningFailedException(
+            ProvisioningFailedException ex, HttpServletRequest request) {
 
         ErrorResponseException response = new ErrorResponseException(
                 LocalDateTime.now(),

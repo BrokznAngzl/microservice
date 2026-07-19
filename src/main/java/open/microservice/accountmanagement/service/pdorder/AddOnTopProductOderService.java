@@ -10,6 +10,7 @@ import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalParam;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
 import open.microservice.accountmanagement.service.IComposer;
+import open.microservice.accountmanagement.service.om.ExternalOrderService;
 import open.microservice.accountmanagement.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,11 @@ public class AddOnTopProductOderService implements IComposer {
     @Autowired
     private AppConfig appConfig;
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
     @Autowired
     private CacheUtil cacheUtil;
+    @Autowired
+    private ExternalOrderService externalOrderService;
 
     @Override
     public boolean canCompose(String value) {
@@ -41,11 +44,7 @@ public class AddOnTopProductOderService implements IComposer {
     public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) {
         log.info("Composing on top order");
         AppConfig.Pod node = appConfig.getPod();
-        String host = node.getHost();
-        String uri = node.getUri();
-
-        externalOrder.setEndpoint(host + uri);
-        externalOrder.setStatus(PENDING);
+        String endpoint = node.getHost() + node.getUri();
 
         List<ExternalParam> externalParams = cacheUtil.getExternalParam(externalOrder.getExternalId());
         String jsonModel = mapper.writeValueAsString(orderProperty);
@@ -74,6 +73,7 @@ public class AddOnTopProductOderService implements IComposer {
         }
 
         parameterUtil.evaluate(parameters, requestBody);
-        externalOrder.setRequestInfo(requestBody.toString());
+        externalOrderService.initExternalOrder(externalOrder, endpoint, requestBody.toString(), null);
+
     }
 }

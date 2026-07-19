@@ -119,6 +119,7 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
                         .orElseThrow(() -> new ComposeFailedException(COMPOSE_FAILED, StringUtil.format(COMPOSER_NOT_FOUND_DETAIL, exOrder.getExternalId())));
                 composer.compose(orderProperty, exOrder, order);
             }
+
         } else {
             log.error("has no external order to compose");
             throw new ComposeFailedException(COMPOSE_FAILED, StringUtil.format(EXTERNAL_ORDER_NOT_FOUND_DETAIL, order.getId()));
@@ -194,12 +195,9 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
     private ExternalOrder getDraftExternalOrder(External external, String orderId, int exOrderSeq) {
         ExternalOrder externalOrder = new ExternalOrder();
         externalOrder.setId(String.format("%s-%03d", orderId, exOrderSeq));
-//        externalOrder.setOrderId(orderId);
         externalOrder.setExternalId(external.getId());
         externalOrder.setOrderName(external.getOrderName());
         externalOrder.setExternalNode(external.getExternalNode());
-        externalOrder.setCreatedBy("SOOD LORE");
-//        externalOrder.setEndpoint();
         log.info("external order draft: {}", externalOrder.getOrderName());
         return externalOrder;
     }

@@ -12,6 +12,7 @@ import open.microservice.accountmanagement.model.request.internal.AccountRequest
 import open.microservice.accountmanagement.model.request.pf.ProfileRequestParam;
 import open.microservice.accountmanagement.repository.profile.AddressRepository;
 import open.microservice.accountmanagement.service.IComposer;
+import open.microservice.accountmanagement.service.om.ExternalOrderService;
 import open.microservice.accountmanagement.util.DateUtil;
 import open.microservice.accountmanagement.util.ObjectUtil;
 import open.microservice.accountmanagement.util.StringUtil;
@@ -23,7 +24,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import static open.microservice.accountmanagement.constant.ComposeKeyConstant.CREATE_PROFILE;
-import static open.microservice.accountmanagement.constant.StatusConstant.PENDING;
 
 
 @Service
@@ -33,6 +33,8 @@ public class CreateProfileService implements IComposer {
     private ObjectMapper objectMapper;
     @Autowired
     private AddressRepository addressRepository;
+    @Autowired
+    private ExternalOrderService externalOrderService;
 
     @Override
     public boolean canCompose(String value) {
@@ -44,12 +46,12 @@ public class CreateProfileService implements IComposer {
         AccountRequest request = objectMapper.readValue(order.getRequest(), AccountRequest.class);
         Account account = composeAccount(request);
 
+        /* set account for mapping with db condition */
         orderProperty.getOrderItem().setAccount(ObjectUtil.getDto(account));
         String profileRequestParam = objectMapper.writeValueAsString(new ProfileRequestParam(account, account.getAddress()));
         if (log.isDebugEnabled()) log.debug("Profile Request Param: {}", profileRequestParam);
 
-        externalOrder.setRequestInfo(profileRequestParam);
-        externalOrder.setStatus(PENDING);
+        externalOrderService.initExternalOrder(externalOrder, null, profileRequestParam, null);
         // no endpoint for this task, save with jpa
         // externalOrder.setEndpoint();
     }
