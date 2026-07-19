@@ -17,7 +17,7 @@ public class AccountManagementApplication {
 
 	@PostConstruct
 	public void loadCache() {
-		cacheUtil.loadOperatorManagementCache();
+		cacheUtil.loadOrderManagementCache();
 	}
 
 }

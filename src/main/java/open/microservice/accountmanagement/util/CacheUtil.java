@@ -70,7 +70,7 @@ public class CacheUtil {
         return value;
     }
 
-    public void loadOperatorManagementCache() {
+    public void loadOrderManagementCache() {
         List<External> externals = externalRepository.findAll();
         List<ErrorMessage> errorMsgs = errorMessageRepository.findAll();
 
