@@ -17,7 +17,7 @@ public class AccountManagementController {
     CreateAccountWorkFlow createAccountWorkFlow;
 
     @PostMapping(value = REGISTRY)
-    public ResponseEntity<?> createNewAccount(@RequestBody AccountRequest requestBody) throws Exception{
+    public ResponseEntity<?> createNewAccount(@RequestBody AccountRequest requestBody){
         createAccountWorkFlow.validateRequest(requestBody);
 
         OrderPropertyInformation orderProperty = createAccountWorkFlow.buildOrderProperty(requestBody);

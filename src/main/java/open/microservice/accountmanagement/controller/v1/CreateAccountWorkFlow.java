@@ -2,9 +2,10 @@ package open.microservice.accountmanagement.controller.v1;
 
 
 import lombok.extern.log4j.Log4j2;
-import open.microservice.accountmanagement.controller.IControllerHelper;
+import open.microservice.accountmanagement.controller.IWorkFlow;
 import open.microservice.accountmanagement.model.dto.AccountDto;
 import open.microservice.accountmanagement.model.exception.ComposeFailedException;
+import open.microservice.accountmanagement.model.exception.ProvisioningFailedException;
 import open.microservice.accountmanagement.model.exception.ResourceNotFoundException;
 import open.microservice.accountmanagement.model.exception.ValidateFailedException;
 import open.microservice.accountmanagement.model.hibernate.OrderPropertyInformation;
@@ -35,11 +36,12 @@ import java.util.List;
 import static open.microservice.accountmanagement.constant.APIConstant.CREATE_ACCOUNT;
 import static open.microservice.accountmanagement.constant.ErrorConstant.*;
 import static open.microservice.accountmanagement.constant.ParameterConstance.PHONE_NUMBER;
+import static open.microservice.accountmanagement.constant.StatusConstant.*;
 
 
 @Component
 @Log4j2
-public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> {
+public class CreateAccountWorkFlow implements IWorkFlow<AccountRequest> {
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -93,18 +95,23 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
     }
 
     @Override
-    @Transactional(timeout = 60, transactionManager = "omTransactionManager", rollbackFor = Exception.class)
+    @Transactional(timeout = 30, transactionManager = "omTransactionManager", rollbackFor = Exception.class)
     public void saveOrderAndExOrder(Order order) {
         exOrderRepository.saveAll(order.getExternalOrder());
         orderRepository.save(order);
     }
 
     @Override
-    public ResponseEntity<?> composeResponse(OrderPropertyInformation orderProperty, AccountRequest request) throws Exception {
+    public ResponseEntity<?> composeResponse(OrderPropertyInformation orderProperty) {
         AccountDto profile = orderProperty.getOrderItem().getAccount();
         ResponseModel responseModel = new ResponseModel();
         responseModel.setAccountNo(profile.getAccountNo());
         responseModel.setAccountName(profile.getAccountName());
+
+        Order order = orderProperty.getOrder();
+        order.setResponse(mapper.writeValueAsString(responseModel));
+        orderRepository.save(order);
+
         return ResponseEntity.status(HttpStatus.OK.value()).body(responseModel);
     }
 
@@ -129,14 +136,41 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
     @Override
     public void provisioning(Order order) {
 
-        if (ObjectUtil.isNotEmpty(order.getExternalOrder())) {
-            for (ExternalOrder exOrder : order.getExternalOrder()) {
-                IProvisioner provisioner = provisioners.stream()
-                        .filter(p -> p.canProvisioning(exOrder.getExternalNode()))
-                        .findFirst()
-                        .orElseThrow(() -> new ComposeFailedException(PROVISIONING_FAILED, StringUtil.format(PROVISIONING_FAILED, exOrder.getExternalId())));
-                provisioner.provisioning(exOrder);
+        List<ExternalOrder> exOrders = order.getExternalOrder();
+        if (ObjectUtil.isNotEmpty(exOrders)) {
+
+            try {
+                for (ExternalOrder exOrder : exOrders) {
+                    IProvisioner provisioner = provisioners.stream()
+                            .filter(p -> p.canProvisioning(exOrder.getExternalNode()))
+                            .findFirst()
+                            .orElseThrow(() -> new ProvisioningFailedException(PROVISIONING_FAILED,
+                                    StringUtil.format(PROVISIONER_NOT_FOUND_DETAIL, exOrder.getExternalNode())));
+                    provisioner.provisioning(exOrder);
+                }
+
+                boolean anyTaskFailed = exOrders.stream().anyMatch(exOrder -> !StringUtil.equals(exOrder.getStatus(), COMPLETED));
+                if (anyTaskFailed) {
+                    log.error("found failed task in order: {}", order.getId());
+                    throw new ProvisioningFailedException(PROVISIONING_FAILED, StringUtil.format(PROVISIONING_FAILED_DETAIL, "Order", order.getId()));
+                } else {
+                    setOrderLastUpdate(order, COMPLETED);
+                    orderRepository.save(order);
+                }
+
+            } catch (ProvisioningFailedException e) {
+                setOrderLastUpdate(order, FAILED);
+                orderRepository.save(order);
+
+                throw e;
+            } catch (Exception e) {
+                setOrderLastUpdate(order, FAILED);
+                orderRepository.save(order);
+
+                throw new ProvisioningFailedException(PROVISIONING_FAILED, StringUtil.format(PROVISIONING_FAILED_DETAIL, "Order", order.getId()));
+
             }
+
 
         } else {
             log.error("order does not have any tasks to provision");
@@ -149,6 +183,10 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
         order.setId(IdGeneratorUtil.generateId(1000, 10000)); // 1000 - 9999
         String requestInfo = mapper.writeValueAsString(request);
         order.setRequest(requestInfo);
+        order.setStatus(PENDING);
+        order.setCreatedDate(DateUtil.getCurrentLocalDateTime());
+        order.setCreatedBy("SOOD LORE");
+
         orderProperty.setRequestInfo(requestInfo);
 
         String action = request.getAction();
@@ -200,6 +238,12 @@ public class CreateAccountWorkFlow implements IControllerHelper<AccountRequest> 
         externalOrder.setExternalNode(external.getExternalNode());
         log.info("external order draft: {}", externalOrder.getOrderName());
         return externalOrder;
+    }
+
+    public void setOrderLastUpdate(Order order, String status) {
+        order.setLastUpdatedDate(DateUtil.getCurrentLocalDateTime());
+        order.setLastUpdatedBy("SOOD LORE");
+        order.setStatus(status);
     }
 }
 
