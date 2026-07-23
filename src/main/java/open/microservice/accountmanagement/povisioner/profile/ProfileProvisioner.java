@@ -58,9 +58,4 @@ public class ProfileProvisioner implements IProvisioner {
         }
 
     }
-
-    @Override
-    public void resend(ExternalOrder externalOrder) {
-//        provisioning again
-    }
 }

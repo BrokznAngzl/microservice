@@ -55,9 +55,4 @@ public class PaymentProvisioner implements IProvisioner {
         }
 
     }
-
-    @Override
-    public void resend(ExternalOrder externalOrder) {
-//        provisioning again
-    }
 }
