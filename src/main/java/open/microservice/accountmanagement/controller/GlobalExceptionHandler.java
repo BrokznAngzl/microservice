@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
 
         ErrorResponseException response = new ErrorResponseException(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
                 ex.getMessage(),
                 ex.getErrorDetails(),
                 ex.getErrorDetail(),

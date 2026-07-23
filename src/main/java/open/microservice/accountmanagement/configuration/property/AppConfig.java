@@ -9,10 +9,20 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app-config")
 public class AppConfig {
     private Pod pod;
+    private Pmd pmd;
 
     /* product order */
     @Data
     public static class Pod {
+        private String host;
+        private String uri;
+        private String conTimeout;
+        private String readTimeout;
+    }
+
+    /* payment domain */
+    @Data
+    public static class Pmd {
         private String host;
         private String uri;
         private String conTimeout;

@@ -1,0 +1,78 @@
+package open.microservice.accountmanagement.service.pmd;
+
+import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import open.microservice.accountmanagement.configuration.property.AppConfig;
+import open.microservice.accountmanagement.model.Parameter;
+import open.microservice.accountmanagement.model.hibernate.OrderPropertyInformation;
+import open.microservice.accountmanagement.model.hibernate.om.Condition;
+import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
+import open.microservice.accountmanagement.model.hibernate.om.ExternalParam;
+import open.microservice.accountmanagement.model.hibernate.om.Order;
+import open.microservice.accountmanagement.service.IComposer;
+import open.microservice.accountmanagement.service.om.ExternalOrderService;
+import open.microservice.accountmanagement.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static open.microservice.accountmanagement.constant.ComposeKeyConstant.CREATE_ACCOUNT_WALLET;
+
+
+@Slf4j
+@Service
+public class CreateAccountWalletComposeService implements IComposer {
+    @Autowired
+    private AppConfig appConfig;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private CacheUtil cacheUtil;
+    @Autowired
+    private ExternalOrderService externalOrderService;
+
+    @Override
+    public boolean canCompose(String value) {
+        return StringUtil.equals(value, CREATE_ACCOUNT_WALLET);
+    }
+
+    @Override
+    public void compose(OrderPropertyInformation orderProperty, ExternalOrder externalOrder, Order order) {
+        log.info("composing create account wallet");
+        AppConfig.Pmd node = appConfig.getPmd();
+        String endpoint = node.getHost() + node.getUri();
+
+        List<ExternalParam> externalParams = cacheUtil.getExternalParam(externalOrder.getExternalId());
+        String jsonModel = mapper.writeValueAsString(orderProperty);
+        ParameterUtil parameterUtil = new ParameterUtil(jsonModel);
+        ConditionUtil conditionUtil = new ConditionUtil(jsonModel);
+        List<Parameter> parameters = new ArrayList<>();
+        JsonObject requestBody = new JsonObject();
+
+        for (ExternalParam exParam : externalParams) {
+            boolean isActive = true;
+
+            Condition condition = exParam.getCondition();
+            if (ObjectUtil.isNotEmpty(condition)) {
+                isActive = conditionUtil.activeCondition(condition);
+            }
+
+            if (!isActive) {
+                continue;
+            }
+
+            log.info("composing parameter: {}", exParam.getParameterName());
+            String paramName = exParam.getParameterName();
+            String value = parameterUtil.getValue(exParam);
+            parameterUtil.buildParam(parameters, paramName, value);
+
+        }
+
+        parameterUtil.evaluate(parameters, requestBody);
+        externalOrderService.initExternalOrder(externalOrder, endpoint, requestBody.toString(), null);
+
+    }
+}

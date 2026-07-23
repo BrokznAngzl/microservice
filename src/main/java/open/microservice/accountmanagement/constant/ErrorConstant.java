@@ -10,6 +10,7 @@ public class ErrorConstant {
     public static final String UNPEXPECTED_ERROR = "An unexpected error occurred";
     public static final String PROVISIONING_FAILED = "Provisioning Failed";
     public static final String PROVISIONING_FAILED_DETAIL = "Provisioning {0} Failed: {1}";
+    public static final String PROVISIONER_NOT_FOUND_DETAIL = "Provisioner {0} Was Not Found";
 
     public static final String ER404 = "ERR-404";
     public static final String ER400 = "ERR-400";

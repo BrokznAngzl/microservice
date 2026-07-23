@@ -21,9 +21,6 @@ public class ExternalOrder {
     @Id
     private String id;
 
-//    @Column(name = "order_id")
-//    private String orderId;
-
     @Column(name = "order_name")
     private String orderName;
 
