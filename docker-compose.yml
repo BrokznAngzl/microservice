@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: om-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "p@ssw0rd1234"
+    ports:
+      - "1433:1433"
+    volumes:
+      - omdbdata:/var/opt/mssql
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+
+  oracle:
+    image: gvenzl/oracle-xe:latest
+    container_name: pf-db
+    environment:
+      # สำหรับ SYS, SYSTEM
+      ORACLE_PASSWORD: "p@ssw0rd1234"
+      APP_USER: "PF_USR"
+      APP_USER_PASSWORD: "p@ssw0rd1234"
+    ports:
+      - "1521:1521"
+    volumes:
+      - pfdbdata:/container-entrypoint-initdb.d # สคริปต์สำรองข้อมูล
+      - pforadata:/opt/oracle/oradata           # ที่เก็บ Data จริง
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: "2.0"
+
+  smockin:
+    image: mgallina/smockin:latest
+#    image: smockin-local:1.1
+    container_name: smockin
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+      - "8003:8003"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+
+volumes:
+  omdbdata:
+  pfdbdata:
+  pforadata:
+#  smockindata:
+
