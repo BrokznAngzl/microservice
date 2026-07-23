@@ -5,9 +5,12 @@ spring:
   datasource:
     om:
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      url: jdbc:sqlserver://
-      username:
-      password:
+      url: jdbc:sqlserver://;serverName=localhost;databaseName=master;encrypt=true;trustServerCertificate=true
+      username: om_user
+      password: p@ssw0rd1234
+#      url: ${SPRING_DATASOURCE_OM_URL}
+#      username: ${SPRING_DATASOURCE_OM_USERNAME}
+#      password: ${SPRING_DATASOURCE_OM_PASSWORD}
       hikari:
         maximum-pool-size: 10
         minimum-idle: 2
@@ -17,9 +20,9 @@ spring:
 
     pf:
       driver-class-name: oracle.jdbc.OracleDriver
-      url: jdbc:oracle:thin:@//
-      username:
-      password:
+      url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
+      username: PF_USR
+      password: p@ssw0rd1234
       hikari:
         maximum-pool-size: 10
         minimum-idle: 2
@@ -34,3 +37,15 @@ spring:
     properties:
       hibernate:
         format_sql: false
+
+app-config:
+  pod:
+    host: http://localhost:8001
+    uri: /product-order/add-on-top
+    conTimeout: 10
+    readTimeout: 10
+  pmd:
+    host: http://localhost:8001
+    uri: /payment/create-account-wallet
+    conTimeout: 10
+    readTimeout: 10
