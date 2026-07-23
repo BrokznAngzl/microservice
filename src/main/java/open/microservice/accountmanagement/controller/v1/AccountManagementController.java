@@ -28,18 +28,7 @@ public class AccountManagementController {
 
         createAccountWorkFlow.provisioning(orderProperty.getOrder());
 
-        return createAccountWorkFlow.composeResponse(orderProperty, requestBody);
+        return createAccountWorkFlow.composeResponse(orderProperty);
     }
-
-//    @PatchMapping(value = MODIFY)
-//    public ResponseEntity<?> modifyProfile(@RequestBody AccountRequest requestBody) {
-//        return ResponseEntity.status(HttpStatus.OK).build();
-//    }
-
-//    @PostMapping(value = RESEND)
-//    public ResponseEntity<?> resendExternalOrder(@RequestBody AccountRequest requestBody) throws Exception {
-//        ResponseEntity<?> responseBody = createAccountWorkFlow.composeResponse(new OrderBufferModel(), requestBody);
-//        return responseBody;
-//    }
 
 }
