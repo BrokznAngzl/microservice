@@ -37,7 +37,7 @@ services:
           cpus: "2.0"
 
   smockin:
-    image: mgallina/smockin:latest
+    image: mgallina/smockin:2201
 #    image: smockin-local:1.1
     container_name: smockin
     ports:
