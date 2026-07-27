@@ -1,15 +1,12 @@
 package open.microservice.accountmanagement.controller.ordermanagement;
 
+import open.microservice.accountmanagement.model.request.internal.OrderFilter;
 import open.microservice.accountmanagement.service.om.OrderManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import static open.microservice.accountmanagement.constant.APIConstant.RE_PROVISIOING;
-import static open.microservice.accountmanagement.constant.APIConstant.SERVICE_PREFIX_V1;
+import static open.microservice.accountmanagement.constant.APIConstant.*;
 
 @RestController
 @RequestMapping(SERVICE_PREFIX_V1)
@@ -22,4 +19,10 @@ public class OrderManagementController {
     public ResponseEntity<?> reProvisioningExternalOrder(@PathVariable String orderId) {
         return orderManagementService.reProvisioningExternalOrder(orderId);
     }
+
+    @GetMapping(value = ORDERS)
+    public ResponseEntity<?> getOrders(OrderFilter filter) {
+        return orderManagementService.getOrdersData(filter);
+    }
 }
+

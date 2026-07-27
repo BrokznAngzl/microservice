@@ -1,12 +1,13 @@
 package open.microservice.accountmanagement.service.om;
 
 import lombok.extern.log4j.Log4j2;
-import open.microservice.accountmanagement.model.dto.AccountDto;
+import open.microservice.accountmanagement.model.dto.OrderDto;
 import open.microservice.accountmanagement.model.exception.ProvisioningFailedException;
 import open.microservice.accountmanagement.model.exception.ResourceNotFoundException;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.model.hibernate.om.Order;
 import open.microservice.accountmanagement.model.hibernate.pf.Account;
+import open.microservice.accountmanagement.model.request.internal.OrderFilter;
 import open.microservice.accountmanagement.model.request.pf.ProfileRequestParam;
 import open.microservice.accountmanagement.model.response.interal.ResponseModel;
 import open.microservice.accountmanagement.povisioner.IProvisioner;
@@ -14,11 +15,13 @@ import open.microservice.accountmanagement.repository.om.OrderRepository;
 import open.microservice.accountmanagement.util.DateUtil;
 import open.microservice.accountmanagement.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,5 +116,41 @@ public class OrderManagementService {
         order.setStatus(status);
     }
 
+    public ResponseEntity<?> getOrdersData(OrderFilter filter) {
+        List<Order> orders = getOrders(filter);
+
+        if (orders.isEmpty()) {
+            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND, StringUtil.format(RESOURCE_NOT_FOUND_DETAIL, "order", mapper.writeValueAsString(filter)));
+        }
+
+        List<OrderDto> orderDtoList = clearExternalOrder(orders);
+
+        return ResponseEntity.ok(orderDtoList);
+    }
+
+    public List<Order> getOrders(OrderFilter filter) {
+        Specification<Order> spec = Specification.where((root, query, cb) -> cb.conjunction());
+
+        if (StringUtil.isNotEmpty(filter.getId())) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("id")), filter.getId()));
+        }
+
+        if (StringUtil.isNotEmpty(filter.getStatus())) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("status")), filter.getStatus()));
+        }
+
+        return orderRepository.findAll(spec);
+    }
+
+    public List<OrderDto> clearExternalOrder(List<Order> orders) {
+        List<OrderDto> orderDtoList = new ArrayList<>();
+
+        for (Order order : orders) {
+            OrderDto orderDto = mapper.convertValue(order, OrderDto.class);
+            orderDtoList.add(orderDto);
+        }
+
+        return orderDtoList;
+    }
 }
 

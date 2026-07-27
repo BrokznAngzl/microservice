@@ -8,6 +8,7 @@ public class APIConstant {
     public static final String TERMINATE = "/terminate";
     public static final String MODIFY = "/modify";
     public static final String RE_PROVISIOING = "/re-provisioning";
+    public static final String ORDERS = "/orders";
 
     /* api name */
     public static final String CREATE_ACCOUNT = "/v1/registry";
