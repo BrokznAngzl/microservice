@@ -5,7 +5,9 @@ spring:
   datasource:
     om:
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      url: jdbc:sqlserver://;serverName=localhost;databaseName=master;encrypt=true;trustServerCertificate=true
+#      url: jdbc:sqlserver://;serverName=localhost;databaseName=master;encrypt=true;trustServerCertificate=true
+#      container
+      url: jdbc:sqlserver://sqlserver:1433;databaseName=master;encrypt=true;trustServerCertificate=true
       username: om_user
       password: p@ssw0rd1234
 #      url: ${SPRING_DATASOURCE_OM_URL}
@@ -20,7 +22,8 @@ spring:
 
     pf:
       driver-class-name: oracle.jdbc.OracleDriver
-      url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
+#      url: jdbc:oracle:thin:@//localhost:1521/XEPDB1
+      url: jdbc:oracle:thin:@//oracle:1521/XEPDB1    # container
       username: PF_USR
       password: p@ssw0rd1234
       hikari:
@@ -40,12 +43,14 @@ spring:
 
 app-config:
   pod:
-    host: http://localhost:8001
+#    host: http://localhost:8001
+    host: http://smockin:8001            # container
     uri: /product-order/add-on-top
     conTimeout: 10
     readTimeout: 10
   pmd:
-    host: http://localhost:8001
+#    host: http://localhost:8001
+    host: http://smockin:8001            # container
     uri: /payment/create-account-wallet
     conTimeout: 10
     readTimeout: 10
