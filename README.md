@@ -1,7 +1,7 @@
 # MICROSERVICE APPLCIATION
 ## Example of Microservice Application
 
-This project involves creating an API for database connection and information management using Java Spring Boot and oracle, mssql. It includes data validation and some unit tests.
+A Java Spring Boot microservice for account management, providing REST APIs and database integration with Oracle and Microsoft SQL Server. Includes unit testing and API mocking using Smockin.
 
 ### Service Concept
 ![service-concept](previewdata/order-concept.webp)
