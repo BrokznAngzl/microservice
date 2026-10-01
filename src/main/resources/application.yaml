@@ -43,6 +43,7 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+    enabled: false
 
 app-config:
   pod:

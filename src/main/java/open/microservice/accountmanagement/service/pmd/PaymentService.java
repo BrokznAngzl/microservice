@@ -11,7 +11,7 @@ import static open.microservice.accountmanagement.constant.StatusConstant.COMPLE
 @Service
 public class PaymentService {
 
-    @Autowired
+    @Autowired(required = false)
     private PaymentProducer paymentProducer;
 
     public void completePayment(String paymentId, String productId, String amount) {
