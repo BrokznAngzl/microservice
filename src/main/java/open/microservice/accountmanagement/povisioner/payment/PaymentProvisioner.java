@@ -1,12 +1,15 @@
 package open.microservice.accountmanagement.povisioner.payment;
 
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.log4j.Log4j2;
 import open.microservice.accountmanagement.http.PaymentHttpClient;
 import open.microservice.accountmanagement.model.exception.ProvisioningFailedException;
 import open.microservice.accountmanagement.model.hibernate.om.ExternalOrder;
 import open.microservice.accountmanagement.povisioner.IProvisioner;
 import open.microservice.accountmanagement.repository.om.ExternalOrderRepository;
+import open.microservice.accountmanagement.service.pmd.PaymentService;
 import open.microservice.accountmanagement.util.DateUtil;
 import open.microservice.accountmanagement.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class PaymentProvisioner implements IProvisioner {
     private PaymentHttpClient paymentHttpClient;
     @Autowired
     private ExternalOrderRepository externalOrderRepository;
+    @Autowired
+    private PaymentService paymentService;
 
     @Override
     public boolean canProvisioning(String value) {
@@ -39,6 +44,14 @@ public class PaymentProvisioner implements IProvisioner {
             externalOrder.setResponseInfo(responseBody);
             externalOrder.setResponseDate(DateUtil.getCurrentLocalDateTime());
             externalOrder.setStatus(COMPLETED);
+
+//            JsonObject requestBody = JsonParser.parseString(externalOrder.getRequestInfo()).getAsJsonObject();
+//
+//            paymentService.completePayment(
+//                    requestBody.get("paymentId").getAsString(),
+//                    requestBody.get("productId").getAsString(),
+//                    requestBody.get("amount").getAsString()
+//            );
 
         } catch (ProvisioningFailedException e) {
             log.error("error provisioning product order: {}", e.getMessage());
